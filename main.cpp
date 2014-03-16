@@ -1,13 +1,15 @@
 #include <allegro.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #define PI 3.141592654
 
 
 
 void init();
 void deinit();
-
+static clock_t t_ini, t_fin;
+double tiempo;
 void dibujarCirculoPolar(int r, int xc, int yc);
 void dibujarCirculoBresenham(int r, int xc, int yc);
 void dibujarLineaBresenham(int x0, int y0, int x1, int y1);
@@ -18,6 +20,7 @@ void dibujarPixel(int x, int y);
 
 /* Imprime el menu principal de la aplicacion */
 void menu(){
+	 
 	 clear_to_color(screen, 0x000000);
  	 textout_ex(screen, font, "ALGORITMOS PARA DIBUJAR PRIMITIVAS" , 200, 50, 0xFFFFFF, 0x000000);
    	 textout_ex(screen, font, "1.Linea DDA" , 150, 100, 0xFFFFFF, 0x000000);
@@ -25,7 +28,7 @@ void menu(){
    	 textout_ex(screen, font, "3.Circulo Polar" , 150, 160, 0xFFFFFF, 0x000000);
    	 textout_ex(screen, font, "4.Circulo Bresenham" , 150, 190, 0xFFFFFF, 0x000000);   
    	 textout_ex(screen, font, "PRESIONE LA TECLA ESC PARA SALIR" , 200, 300, 0xFFFFFF, 0x000000);	 
-   	 textout_ex(screen, font, "<<  Computacion grafica Unimag 2014-I  -- Genesis Guerrero & Ronald Ruiz  >>" , 15, 430, 0xFFFFFF, 0x000000);	
+   	 textout_ex(screen, font, "<<  Computacion grafica Unimag 2014-I  >>" , 15, 430, 0xFFFFFF, 0x000000);	
   	 rest(200);
 }
 int main() {
@@ -56,8 +59,13 @@ int main() {
 					}
 					if(listo){ /*despues que indique la trayectoria se pasan los parametros a la funcion encargada de ejecutar
 								el algoritmo */
+						t_ini = clock();
 						dibujarLineaDDA(x0,y0,x1,y1);						
-						textout_ex(screen, font, "Presione la tecla Enter para regresar al menu" , 140, 450, 0xFFFFFF, 0x000000);
+						t_fin = clock();
+        				tiempo = t_fin - t_ini;
+						
+						textout_ex(screen, font, "Presione la tecla Enter para regresar al menu " , 140, 450, 0xFFFFFF, 0x000000);
+						textprintf(screen, font , 30, 50, makecol(255,255,255), "TIEMPO: %e ms",tiempo);   
 						listo = false;
 					}										 
 			}
@@ -79,28 +87,50 @@ int main() {
 						presionado = false;
 						listo = true;						
 					}
-					if(listo){
+					if(listo){						
+						t_ini = clock();
 						dibujarLineaBresenham(x0,y0,x1,y1);						
+						t_fin = clock();
+        				tiempo = t_fin - t_ini;
 						textout_ex(screen, font, "Presione la tecla Enter para regresar al menu" , 140, 450, 0xFFFFFF, 0x000000);
+						textprintf(screen, font , 30, 50, makecol(255,255,255), "TIEMPO: %e ms",tiempo);   
 						listo = false;
 					}										 
 			}
 		}
 		if(key[KEY_3]){//si presiona 2, se ejecuta el algoritmo Polar para cincunferencias
-			while(!key[KEY_ENTER]){				
-					clear(screen);
-					dibujarCirculoPolar(50, 100, 200);	//se llama a la funcion con parametros por defecto
-					textout_ex(screen, font, "Presione la tecla Enter para regresar al menu" , 140, 450, 0xFFFFFF, 0x000000); 
+			listo = true;
+			clear(screen);
+			while(!key[KEY_ENTER]){									
+					if(listo){
+						t_ini = clock();
+						dibujarCirculoPolar(50, 100, 200);	//se llama a la funcion con parametros por defecto
+						t_fin = clock();
+	        			tiempo = t_fin - t_ini;
+						
+						textout_ex(screen, font, "Presione la tecla Enter para regresar al menu" , 140, 450, 0xFFFFFF, 0x000000);
+						textprintf(screen, font , 30, 50, makecol(255,255,255), "TIEMPO: %e ms",tiempo);   
+						listo = false;	
+					}
+					
 							
 			}
 		
 		}	
 		if(key[KEY_4]){//si presiona 2, se ejecuta el algoritmo de bresenham para cincunferencias
-			while(!key[KEY_ENTER]){				
-					clear(screen);
-					dibujarCirculoBresenham(80, 200, 200);	//se llama a la funcion con parametros por defecto
-					textout_ex(screen, font, "Presione la tecla Enter para regresar al menu" , 140, 450, 0xFFFFFF, 0x000000); 
-				
+			clear(screen);
+			listo = true;
+			while(!key[KEY_ENTER]){									
+					if(listo){
+						t_ini = clock();
+						dibujarCirculoBresenham(80, 200, 200);	//se llama a la funcion con parametros por defecto
+						t_fin = clock();
+	        			tiempo = t_fin - t_ini;
+	        
+						textprintf(screen, font , 30, 50, makecol(255,255,255), "TIEMPO: %e ms",tiempo);   
+						textout_ex(screen, font, "Presione la tecla Enter para regresar al menu" , 140, 450, 0xFFFFFF, 0x000000); 
+						listo = false;
+					}
 				}
 			}		
 		}	
@@ -149,7 +179,7 @@ void dibujarPixel(int x, int y){
 /************** ALGORITMOS PARA PRIMITIVAS **********************/
 /*****************************************************************/
 
-void dibujarCirculoBresenham(int r, int xc, int yc) {
+void dibujarCirculoBresenham(int r, int xc, int yc) {		
         // Punto inicial del círculo
         int x = 0;
         int y = r;
@@ -157,20 +187,17 @@ void dibujarCirculoBresenham(int r, int xc, int yc) {
         int pk = 1-r;
         
         // verificar el pk para determinar las posiciones de pixel siguuientes
+        
         while (x<=y)
         {
             dibujarPixel( xc+x,yc+y);            
             dibujarPixel( xc-x,yc+y); 
-			rest(5);
             dibujarPixel( xc+x,yc-y);            
-            dibujarPixel( xc-x,yc-y); 
-			rest(5);           
+            dibujarPixel( xc-x,yc-y); 			
             dibujarPixel( yc+y,xc+x);            
-            dibujarPixel( yc-y,xc+x);            
-            rest(5);
+            dibujarPixel( yc-y,xc+x);    
             dibujarPixel( yc+y,xc-x);            
-            dibujarPixel( yc-y,xc-x);
-            rest(5);
+            dibujarPixel( yc-y,xc-x);            
             
             if (pk<0){
                 pk+=2*(x+1)+1;
@@ -183,6 +210,7 @@ void dibujarCirculoBresenham(int r, int xc, int yc) {
                 y--;
             }
         }
+        
     }
  void dibujarCirculoPolar(int r, int xc, int yc) { 		
  		
@@ -200,8 +228,7 @@ void dibujarCirculoBresenham(int r, int xc, int yc) {
             double xd = r *cos(theta);
             x = (int) floor(xd);
             double yd = r * sin(theta);
-            y = (int) floor(yd);
-            rest(5);;
+            y = (int) floor(yd);            
         }
     }
 
@@ -222,8 +249,7 @@ void dibujarLineaDDA(int x0, int y0, int x1, int y1)
 	            while (x0 != x1) {
 	                x0 += dx;
 	                y0 = round(m*x0 + b); //calcula con la ecuacion de la recta
-	                dibujarPixel(x0,y0);
-	                rest(5);;
+	                dibujarPixel(x0,y0);	                
 	            }
 	        } else
 	        if (dy != 0) {                              // pendiente >= 1
@@ -236,8 +262,7 @@ void dibujarLineaDDA(int x0, int y0, int x1, int y1)
 	            while (y0 != y1) {
 	                y0 += dy;
 	                x0 = round(m*y0 + b);
-	                dibujarPixel(x0,y0);//calcula con la ecuacion de la recta
-	                rest(5);;
+	                dibujarPixel(x0,y0);//calcula con la ecuacion de la recta	                
 	            }
 	        }
 }
@@ -282,7 +307,7 @@ void dibujarLineaBresenham(int x0, int y0, int x1, int y1)
 		        p = p + (2*(dy-dx));
 		      }
 		      dibujarPixel(x,y);
-		      rest(5);;
+		      
 	    }
 	  }
 	  else{
@@ -296,8 +321,7 @@ void dibujarLineaBresenham(int x0, int y0, int x1, int y1)
 		        x = x + sigX;
 		        p = p + 2*(dy-dx);
 		      }
-	    	  dibujarPixel(x,y);
-	    	  rest(5);;
+	    	  dibujarPixel(x,y);	    	 
 	    }
 	  }
 }
